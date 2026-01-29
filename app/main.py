@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File
 import os
 from app.ingest import extract_text_from_pdf
+from app.utils import chunk_text
 
 app = FastAPI(title="Knowledge Assistant")
 
@@ -20,9 +21,12 @@ def upload_file(file: UploadFile = File(...)):
      #file->UploadFile, file.file -> underlying file-like object, .read() -> reads all bytes into memory 
      
     text = extract_text_from_pdf(file_path)
+    chunks = chunk_text(text)
 
     return {
         "message": "File uploaded succesfully",
         "filename": file.filename,
-        "text_preview": text[:300]
+        "text_preview": text[:300],
+        "num_chunks": len(chunks),
+        "sample_chunk": chunks[0][:300] if chunks else ""
     }
